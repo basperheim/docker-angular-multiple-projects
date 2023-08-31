@@ -1,0 +1,23 @@
+FROM nginx:stable-alpine3.17 AS base
+ENV PROJECT_NAME=project-1
+
+# Setup the Angular project
+WORKDIR /usr/local/app
+COPY package*.json /usr/local/app/
+COPY angular.json /usr/local/app/
+COPY ./projects/${PROJECT_NAME} /usr/local/app
+
+# Update packages and install NodeJS
+RUN apk add --update nodejs npm && \
+    npm install @angular/cli@16.2.1 -g && npm ci && \
+    npm run build ${PROJECT_NAME}
+
+RUN npx ngcc --properties es2015 browser module main --first-only --create-ivy-entry-points
+
+# Erase default Nginx content and add dist files from Angular
+RUN rm -rf /usr/share/nginx/html && \
+    mkdir -p /usr/share/nginx/html && \
+    # echo '<h1>test</h1>' >> /usr/share/nginx/html/index.html
+    cp -r /usr/local/app/dist/${PROJECT_NAME}/* /usr/share/nginx/html/
+
+EXPOSE 81

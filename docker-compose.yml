@@ -1,0 +1,28 @@
+version: "3.8"
+
+networks:
+  test_network:
+    driver: bridge
+
+services:
+  project-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.project1
+    container_name: project-1
+    ports:
+      - "81:80"
+    networks:
+      - test_network
+    command: ["nginx", "-g", "daemon off;"]
+
+  project-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.project2
+    container_name: project-2
+    ports:
+      - "82:80"
+    networks:
+      - test_network
+    command: ["nginx", "-g", "daemon off;"]
